@@ -76,7 +76,7 @@ def run(gui=False, use_oracle=False, max_pods=None, step_sleep=0.0, seed=None):
             robot.dwell(ACTION_DWELL_SECONDS.get(decision["action"], 0.4))
 
             print(
-                f"[{pod['pod_id']:>6}] {pod['crop_type']:<9} "
+                f"[{pod['pod_id']:>9}] {pod['crop_type']:<9} "
                 f"saw stage='{classification['growth_stage']}' "
                 f"disease={classification['disease_flag']} "
                 f"conf={classification['confidence']:.2f}  "

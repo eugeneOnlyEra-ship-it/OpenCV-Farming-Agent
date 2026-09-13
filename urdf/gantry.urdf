@@ -2,18 +2,22 @@
 <!--
   gantry.urdf
 
-  Two-prismatic-joint gantry robot:
-    base_link   -- fixed anchor at the foot of the vertical rail
-    lift_link   -- slides along Z (vertical movement between layers)
+  Three-prismatic-joint gantry robot:
+    base_link     -- fixed anchor at the foot of the vertical rail
+    lift_link     -- slides along Z (vertical movement between trough layers)
     carriage_link -- slides along X relative to the lift (lateral
-                     movement between pod slots within a layer)
-    camera_link -- small fixed marker on the carriage representing the
-                   "camera" frame-capture point, for visual clarity in
-                   the GUI demo
+                     movement between pole stations)
+    reach_link    -- slides along Y relative to the carriage, a short
+                     throw that swings the camera to the pole's front
+                     face (+Y) or back face (-Y) -- this is what lets
+                     one gantry service both sides of a station without
+                     a second rail
+    camera_link   -- small fixed marker on the reach carriage
+                     representing the camera frame-capture point
 
-  Joint limits are generous (0-3m) and the actual per-pod targets are
-  supplied at runtime from pod_registry, so this file doesn't need to
-  change if the farm layout (layers/positions/spacing) changes.
+  Joint limits are generous and the actual per-pod targets are supplied
+  at runtime from pod_registry, so this file doesn't need to change if
+  the farm layout (stations/layers/spacing) changes.
 -->
 <robot name="pod_farm_gantry">
 
@@ -25,6 +29,9 @@
   </material>
   <material name="carriage_orange">
     <color rgba="0.90 0.55 0.10 1"/>
+  </material>
+  <material name="reach_teal">
+    <color rgba="0.10 0.55 0.55 1"/>
   </material>
   <material name="camera_dark">
     <color rgba="0.05 0.05 0.05 1"/>
@@ -104,15 +111,44 @@
     <child link="carriage_link"/>
     <origin xyz="0 0.05 0" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="0.0" upper="3.0" effort="200" velocity="0.6"/>
+    <limit lower="-3.0" upper="3.0" effort="200" velocity="0.6"/>
     <dynamics damping="5.0" friction="1.0"/>
+  </joint>
+
+  <link name="reach_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.10 0.06"/>
+      </geometry>
+      <material name="reach_teal"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.10 0.06"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.15"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="reach_joint" type="prismatic">
+    <parent link="carriage_link"/>
+    <child link="reach_link"/>
+    <origin xyz="0 0.08 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.35" upper="0.35" effort="100" velocity="0.5"/>
+    <dynamics damping="3.0" friction="0.5"/>
   </joint>
 
   <link name="camera_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.035" length="0.10"/>
+        <cylinder radius="0.03" length="0.08"/>
       </geometry>
       <material name="camera_dark"/>
     </visual>
@@ -123,9 +159,9 @@
   </link>
 
   <joint name="camera_joint" type="fixed">
-    <parent link="carriage_link"/>
+    <parent link="reach_link"/>
     <child link="camera_link"/>
-    <origin xyz="0 0.14 0" rpy="1.5708 0 0"/>
+    <origin xyz="0 0.09 0" rpy="1.5708 0 0"/>
   </joint>
 
 </robot>
