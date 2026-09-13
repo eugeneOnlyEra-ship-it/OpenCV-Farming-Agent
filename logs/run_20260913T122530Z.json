@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": "2026-09-13T12:25:30.365504+00:00",
+    "pod_id": "L0-P0",
+    "layer": 0,
+    "slot": 0,
+    "crop_type": "cabbage",
+    "growth_stage": "S2_3",
+    "disease_flag": false,
+    "confidence": 0.805,
+    "action": "log_and_continue",
+    "reason": "healthy, confident reading (0.81) at stage 'S2_3'",
+    "ground_truth_stage": "S2_3",
+    "ground_truth_diseased": false
+  },
+  {
+    "timestamp": "2026-09-13T12:25:30.386975+00:00",
+    "pod_id": "L0-P1",
+    "layer": 0,
+    "slot": 1,
+    "crop_type": "lettuce",
+    "growth_stage": "Leafy growth",
+    "disease_flag": false,
+    "confidence": 0.842,
+    "action": "log_and_continue",
+    "reason": "healthy, confident reading (0.84) at stage 'Leafy growth'",
+    "ground_truth_stage": "Leafy growth",
+    "ground_truth_diseased": false
+  },
+  {
+    "timestamp": "2026-09-13T12:25:30.405928+00:00",
+    "pod_id": "L0-P2",
+    "layer": 0,
+    "slot": 2,
+    "crop_type": "mushroom",
+    "growth_stage": "Harvest",
+    "disease_flag": true,
+    "confidence": 0.929,
+    "action": "flag_for_treatment",
+    "reason": "disease detected at stage 'Harvest' with confidence 0.93",
+    "ground_truth_stage": "Harvest",
+    "ground_truth_diseased": true
+  },
+  {
+    "timestamp": "2026-09-13T12:25:30.439031+00:00",
+    "pod_id": "L0-P3",
+    "layer": 0,
+    "slot": 3,
+    "crop_type": "cabbage",
+    "growth_stage": "S2_3",
+    "disease_flag": false,
+    "confidence": 0.411,
+    "action": "schedule_monitoring",
+    "reason": "low-confidence reading (0.41 < 0.6) -- re-check before trusting it",
+    "ground_truth_stage": "S9",
+    "ground_truth_diseased": false
+  }
+]

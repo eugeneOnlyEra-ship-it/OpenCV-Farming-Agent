@@ -1,0 +1,5 @@
+timestamp,pod_id,layer,slot,crop_type,growth_stage,disease_flag,confidence,action,reason,ground_truth_stage,ground_truth_diseased
+2026-09-13T12:25:30.365504+00:00,L0-P0,0,0,cabbage,S2_3,False,0.805,log_and_continue,"healthy, confident reading (0.81) at stage 'S2_3'",S2_3,False
+2026-09-13T12:25:30.386975+00:00,L0-P1,0,1,lettuce,Leafy growth,False,0.842,log_and_continue,"healthy, confident reading (0.84) at stage 'Leafy growth'",Leafy growth,False
+2026-09-13T12:25:30.405928+00:00,L0-P2,0,2,mushroom,Harvest,True,0.929,flag_for_treatment,disease detected at stage 'Harvest' with confidence 0.93,Harvest,True
+2026-09-13T12:25:30.439031+00:00,L0-P3,0,3,cabbage,S2_3,False,0.411,schedule_monitoring,low-confidence reading (0.41 < 0.6) -- re-check before trusting it,S9,False

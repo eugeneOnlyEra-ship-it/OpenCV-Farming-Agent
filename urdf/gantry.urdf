@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!--
+  gantry.urdf
+
+  Two-prismatic-joint gantry robot:
+    base_link   -- fixed anchor at the foot of the vertical rail
+    lift_link   -- slides along Z (vertical movement between layers)
+    carriage_link -- slides along X relative to the lift (lateral
+                     movement between pod slots within a layer)
+    camera_link -- small fixed marker on the carriage representing the
+                   "camera" frame-capture point, for visual clarity in
+                   the GUI demo
+
+  Joint limits are generous (0-3m) and the actual per-pod targets are
+  supplied at runtime from pod_registry, so this file doesn't need to
+  change if the farm layout (layers/positions/spacing) changes.
+-->
+<robot name="pod_farm_gantry">
+
+  <material name="rail_grey">
+    <color rgba="0.35 0.35 0.38 1"/>
+  </material>
+  <material name="lift_blue">
+    <color rgba="0.15 0.45 0.75 1"/>
+  </material>
+  <material name="carriage_orange">
+    <color rgba="0.90 0.55 0.10 1"/>
+  </material>
+  <material name="camera_dark">
+    <color rgba="0.05 0.05 0.05 1"/>
+  </material>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.12 0.06"/>
+      </geometry>
+      <material name="rail_grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.12 0.06"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+
+  <link name="lift_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.10 0.30 0.08"/>
+      </geometry>
+      <material name="lift_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.10 0.30 0.08"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <joint name="lift_joint" type="prismatic">
+    <parent link="base_link"/>
+    <child link="lift_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0.0" upper="3.0" effort="200" velocity="0.6"/>
+    <dynamics damping="5.0" friction="1.0"/>
+  </joint>
+
+  <link name="carriage_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.14 0.14 0.10"/>
+      </geometry>
+      <material name="carriage_orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.14 0.14 0.10"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.6"/>
+      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+
+  <joint name="carriage_joint" type="prismatic">
+    <parent link="lift_link"/>
+    <child link="carriage_link"/>
+    <origin xyz="0 0.05 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="3.0" effort="200" velocity="0.6"/>
+    <dynamics damping="5.0" friction="1.0"/>
+  </joint>
+
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.10"/>
+      </geometry>
+      <material name="camera_dark"/>
+    </visual>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="carriage_link"/>
+    <child link="camera_link"/>
+    <origin xyz="0 0.14 0" rpy="1.5708 0 0"/>
+  </joint>
+
+</robot>

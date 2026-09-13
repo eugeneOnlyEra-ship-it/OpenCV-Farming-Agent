@@ -1,0 +1,13 @@
+timestamp,pod_id,layer,slot,crop_type,growth_stage,disease_flag,confidence,action,reason,ground_truth_stage,ground_truth_diseased
+2026-09-13T12:14:52.147229+00:00,L0-P0,0,0,cabbage,S6_7,False,0.724,log_and_continue,"healthy, confident reading (0.72) at stage 'S6_7'",S2_3,False
+2026-09-13T12:14:52.152543+00:00,L0-P1,0,1,lettuce,Early Growth,True,0.786,flag_for_treatment,disease detected at stage 'Early Growth' with confidence 0.79,Leafy growth,False
+2026-09-13T12:14:52.160234+00:00,L0-P2,0,2,mushroom,Intermediate,False,0.95,schedule_monitoring,"healthy, confident, and near harvest ('Intermediate') -- tighten monitoring cadence",Harvest,True
+2026-09-13T12:14:52.166351+00:00,L0-P3,0,3,cabbage,S4_5,True,0.741,flag_for_treatment,disease detected at stage 'S4_5' with confidence 0.74,S9,False
+2026-09-13T12:14:52.175332+00:00,L1-P3,1,3,lettuce,Early Growth,True,0.792,flag_for_treatment,disease detected at stage 'Early Growth' with confidence 0.79,Harvest stage,False
+2026-09-13T12:14:52.183191+00:00,L1-P2,1,2,cabbage,S2_3,False,0.604,schedule_monitoring,healthy but marginal confidence (0.60) -- re-check sooner,S6_7,True
+2026-09-13T12:14:52.189524+00:00,L1-P1,1,1,mushroom,Juvenile,False,0.807,log_and_continue,"healthy, confident reading (0.81) at stage 'Juvenile'",Intermediate,False
+2026-09-13T12:14:52.195067+00:00,L1-P0,1,0,lettuce,Early Growth,False,0.725,log_and_continue,"healthy, confident reading (0.72) at stage 'Early Growth'",Early Growth,False
+2026-09-13T12:14:52.200408+00:00,L2-P0,2,0,mushroom,Juvenile,True,0.928,flag_for_treatment,disease detected at stage 'Juvenile' with confidence 0.93,Juvenile,False
+2026-09-13T12:14:52.208217+00:00,L2-P1,2,1,cabbage,S6_7,False,0.788,log_and_continue,"healthy, confident reading (0.79) at stage 'S6_7'",S4_5,False
+2026-09-13T12:14:52.213045+00:00,L2-P2,2,2,lettuce,Head formation,False,0.85,schedule_monitoring,"healthy, confident, and near harvest ('Head formation') -- tighten monitoring cadence",Head formation,True
+2026-09-13T12:14:52.219017+00:00,L2-P3,2,3,mushroom,Juvenile,False,0.831,log_and_continue,"healthy, confident reading (0.83) at stage 'Juvenile'",Harvest,False
