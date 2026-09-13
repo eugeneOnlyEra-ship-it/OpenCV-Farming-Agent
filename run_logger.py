@@ -19,7 +19,7 @@ import os
 from datetime import datetime, timezone
 
 FIELDNAMES = [
-    "timestamp", "pod_id", "station", "layer", "side", "crop_type",
+    "timestamp", "pod_id", "row", "col", "layer", "side", "crop_type",
     "growth_stage", "disease_flag", "confidence",
     "action", "reason", "ground_truth_stage", "ground_truth_diseased",
 ]
@@ -38,7 +38,8 @@ class RunLogger:
         row = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "pod_id": pod["pod_id"],
-            "station": pod["station"],
+            "row": pod["row"],
+            "col": pod["col"],
             "layer": pod["layer"],
             "side": pod["side"],
             "crop_type": pod["crop_type"],

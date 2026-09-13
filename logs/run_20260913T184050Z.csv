@@ -1,0 +1,25 @@
+timestamp,pod_id,station,layer,side,crop_type,growth_stage,disease_flag,confidence,action,reason,ground_truth_stage,ground_truth_diseased
+2026-09-13T18:40:51.593610+00:00,St0-L0-F,0,0,front,cabbage,S2_3,False,0.898,log_and_continue,"healthy, confident reading (0.90) at stage 'S2_3'",S2_3,False
+2026-09-13T18:40:52.336126+00:00,St0-L0-B,0,0,back,lettuce,Leafy growth,False,0.807,log_and_continue,"healthy, confident reading (0.81) at stage 'Leafy growth'",Leafy growth,False
+2026-09-13T18:40:53.146133+00:00,St0-L1-F,0,1,front,mushroom,Harvest,True,0.863,flag_for_treatment,disease detected at stage 'Harvest' with confidence 0.86,Harvest,True
+2026-09-13T18:40:53.917723+00:00,St0-L1-B,0,1,back,cabbage,S9,False,0.951,schedule_monitoring,"healthy, confident, and near harvest ('S9') -- tighten monitoring cadence",S9,False
+2026-09-13T18:40:54.762036+00:00,St0-L2-F,0,2,front,lettuce,Early Growth,False,0.944,log_and_continue,"healthy, confident reading (0.94) at stage 'Early Growth'",Early Growth,False
+2026-09-13T18:40:55.507230+00:00,St0-L2-B,0,2,back,mushroom,Intermediate,False,0.867,schedule_monitoring,"healthy, confident, and near harvest ('Intermediate') -- tighten monitoring cadence",Intermediate,False
+2026-09-13T18:40:56.338134+00:00,St0-L3-F,0,3,front,cabbage,S6_7,True,0.978,flag_for_treatment,disease detected at stage 'S6_7' with confidence 0.98,S6_7,True
+2026-09-13T18:40:57.112145+00:00,St0-L3-B,0,3,back,lettuce,Harvest stage,False,0.933,schedule_monitoring,"healthy, confident, and near harvest ('Harvest stage') -- tighten monitoring cadence",Harvest stage,False
+2026-09-13T18:40:58.255044+00:00,St1-L3-F,1,3,front,mushroom,Harvest,True,0.839,flag_for_treatment,disease detected at stage 'Harvest' with confidence 0.84,Harvest,True
+2026-09-13T18:40:59.002260+00:00,St1-L3-B,1,3,back,cabbage,S9,False,0.908,schedule_monitoring,"healthy, confident, and near harvest ('S9') -- tighten monitoring cadence",S9,False
+2026-09-13T18:40:59.803502+00:00,St1-L2-F,1,2,front,cabbage,S2_3,False,0.967,log_and_continue,"healthy, confident reading (0.97) at stage 'S2_3'",S2_3,False
+2026-09-13T18:41:00.514255+00:00,St1-L2-B,1,2,back,lettuce,Leafy growth,False,0.99,log_and_continue,"healthy, confident reading (0.99) at stage 'Leafy growth'",Leafy growth,False
+2026-09-13T18:41:01.307431+00:00,St1-L1-F,1,1,front,lettuce,Head formation,True,0.803,flag_for_treatment,disease detected at stage 'Head formation' with confidence 0.80,Head formation,True
+2026-09-13T18:41:02.060606+00:00,St1-L1-B,1,1,back,mushroom,Harvest,False,0.877,schedule_monitoring,"healthy, confident, and near harvest ('Harvest') -- tighten monitoring cadence",Harvest,False
+2026-09-13T18:41:02.863960+00:00,St1-L0-F,1,0,front,mushroom,Juvenile,False,0.969,log_and_continue,"healthy, confident reading (0.97) at stage 'Juvenile'",Juvenile,False
+2026-09-13T18:41:03.583240+00:00,St1-L0-B,1,0,back,cabbage,S4_5,False,0.976,log_and_continue,"healthy, confident reading (0.98) at stage 'S4_5'",S4_5,False
+2026-09-13T18:41:04.709969+00:00,St2-L0-F,2,0,front,lettuce,Harvest stage,False,0.594,schedule_monitoring,low-confidence reading (0.59 < 0.6) -- re-check before trusting it,Early Growth,False
+2026-09-13T18:41:05.530649+00:00,St2-L0-B,2,0,back,mushroom,Intermediate,False,0.947,schedule_monitoring,"healthy, confident, and near harvest ('Intermediate') -- tighten monitoring cadence",Intermediate,False
+2026-09-13T18:41:06.330682+00:00,St2-L1-F,2,1,front,cabbage,S6_7,True,0.918,flag_for_treatment,disease detected at stage 'S6_7' with confidence 0.92,S6_7,True
+2026-09-13T18:41:07.065051+00:00,St2-L1-B,2,1,back,lettuce,Harvest stage,False,0.84,schedule_monitoring,"healthy, confident, and near harvest ('Harvest stage') -- tighten monitoring cadence",Harvest stage,False
+2026-09-13T18:41:07.873095+00:00,St2-L2-F,2,2,front,mushroom,Juvenile,False,0.833,log_and_continue,"healthy, confident reading (0.83) at stage 'Juvenile'",Juvenile,False
+2026-09-13T18:41:08.598261+00:00,St2-L2-B,2,2,back,cabbage,S4_5,False,0.801,log_and_continue,"healthy, confident reading (0.80) at stage 'S4_5'",S4_5,False
+2026-09-13T18:41:09.387089+00:00,St2-L3-F,2,3,front,lettuce,Head formation,True,0.952,flag_for_treatment,disease detected at stage 'Head formation' with confidence 0.95,Head formation,True
+2026-09-13T18:41:10.122456+00:00,St2-L3-B,2,3,back,mushroom,Harvest,False,0.945,schedule_monitoring,"healthy, confident, and near harvest ('Harvest') -- tighten monitoring cadence",Harvest,False

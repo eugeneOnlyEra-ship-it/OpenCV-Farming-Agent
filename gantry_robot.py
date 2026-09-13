@@ -3,20 +3,23 @@ gantry_robot.py
 
 Loads the three-joint gantry URDF and provides:
   - move_to(pod): drives lift_joint (Z), carriage_joint (X), and
-    reach_joint (Y) toward a pod's target position using position
+    row_joint (Y) toward a pod's target position using position
     control, stepping the simulation until all three settle within
-    tolerance (i.e. "stop precisely at the pod", front or back face).
-  - a static scene of STATIONS vertical poles with a trough-shaped
-    marker at every (station, layer, side) position, colored by crop
-    until visited, then recolored by the decision made there
-    (green=log_and_continue, yellow=schedule_monitoring,
+    tolerance (i.e. "stop precisely at the pod", correct row/column/
+    layer/face).
+  - a static scene of a ROWS x COLUMNS grid of vertical poles, spaced
+    with a realistic human-walkable aisle between rows, with a
+    trough-shaped marker at every (row, col, layer, side) position,
+    colored by crop until visited, then recolored by the decision made
+    there (green=log_and_continue, yellow=schedule_monitoring,
     red=flag_for_treatment) so the GUI demo shows the decision loop's
     effect at a glance.
 
 Coordinate mapping: pod_registry gives (x, y, z) in meters --
-x = which pole/station, y = +front/-back offset from the pole
-centerline, z = trough height. The three joints map directly:
-carriage_joint -> x, reach_joint -> y, lift_joint -> z.
+x = which column (pole along a row), y = which row's aisle, offset a
+little further by +front/-back on the pole face, z = trough height.
+The three joints map directly: carriage_joint -> x, row_joint -> y,
+lift_joint -> z.
 """
 
 import pybullet as p
@@ -25,16 +28,22 @@ import os
 import time
 
 from pod_registry import (
-    STATIONS, LAYERS_PER_STATION, STATION_SPACING_M, LAYER_SPACING_M,
-    BASE_HEIGHT_M, SIDE_OFFSET_M, TROUGH_HALF_EXTENTS_M,
+    ROWS, COLUMNS, LAYERS_PER_STATION, COLUMN_SPACING_M, ROW_SPACING_M,
+    LAYER_SPACING_M, BASE_HEIGHT_M, TROUGH_HALF_EXTENTS_M,
 )
 
 LIFT_JOINT = 0
 CARRIAGE_JOINT = 1
-REACH_JOINT = 2
+ROW_JOINT = 2
 
 POSITION_TOLERANCE_M = 0.01
-MAX_SETTLE_STEPS = 480  # ~2s at 240Hz sim step, safety cap so a stuck joint can't hang the loop
+# ~2s at 240Hz was fine for a single row; the grid now has row-to-row
+# jumps up to ROWS*ROW_SPACING_M (~5.3m) and column jumps up to
+# COLUMNS*COLUMN_SPACING_M (~2.25m) in the worst case (e.g. the very
+# first move, or a big serpentine turnaround), so give settling more
+# headroom -- ~6s at 240Hz, comfortably more than the ~9s a full-span
+# move would need at 0.6 m/s.
+MAX_SETTLE_STEPS = 1400
 
 POLE_RADIUS_M = 0.035
 
@@ -69,7 +78,7 @@ class GantryRobot:
 
         urdf_path = os.path.join(os.path.dirname(__file__), "urdf", "gantry.urdf")
         # start the carriage off to the side of the first pole so the
-        # opening move into St0 is visible rather than starting inside it
+        # opening move into R0C0 is visible rather than starting inside it
         self.robot_id = p.loadURDF(
             urdf_path, basePosition=[-0.35, 0, 0], useFixedBase=True
         )
@@ -77,31 +86,37 @@ class GantryRobot:
         self._build_poles_and_troughs()
 
         if gui:
-            farm_span_x = (STATIONS - 1) * STATION_SPACING_M
+            farm_span_x = (COLUMNS - 1) * COLUMN_SPACING_M
+            farm_span_y = (ROWS - 1) * ROW_SPACING_M
+            farm_diag = (farm_span_x ** 2 + farm_span_y ** 2) ** 0.5
             p.resetDebugVisualizerCamera(
-                cameraDistance=max(2.2, farm_span_x + 1.2), cameraYaw=35, cameraPitch=-20,
-                cameraTargetPosition=[farm_span_x / 2, 0, 0.9],
+                cameraDistance=max(2.6, farm_diag * 0.9), cameraYaw=35, cameraPitch=-35,
+                cameraTargetPosition=[farm_span_x / 2, farm_span_y / 2, 0.9],
             )
 
     # ---------- scene construction ----------
 
     def _build_poles_and_troughs(self):
-        """One vertical pole per station, plus a trough marker at every
-        (station, layer, side) position from the pod registry. These are
-        visual-only (no collision shape) -- they're scene furniture the
-        gantry travels past, not obstacles it should physically collide
-        with; giving them collision geometry made the carriage jam
-        against the poles while sliding laterally past them."""
+        """A ROWS x COLUMNS grid of vertical poles (each row its own
+        aisle, spaced per pod_registry.ROW_SPACING_M / COLUMN_SPACING_M),
+        plus a trough marker at every (row, col, layer, side) position
+        from the pod registry. These are visual-only (no collision
+        shape) -- they're scene furniture the gantry travels past, not
+        obstacles it should physically collide with; giving them
+        collision geometry made the carriage jam against the poles
+        while sliding laterally past them."""
         pole_top_z = BASE_HEIGHT_M + (LAYERS_PER_STATION - 1) * LAYER_SPACING_M + 0.35
         pole_grey = (0.42, 0.42, 0.45, 1.0)
 
-        for station in range(STATIONS):
-            station_x = station * STATION_SPACING_M
-            self._add_static_cylinder(
-                radius=POLE_RADIUS_M, height=pole_top_z,
-                position=[station_x, 0, pole_top_z / 2],
-                color=pole_grey,
-            )
+        for row in range(ROWS):
+            row_y = row * ROW_SPACING_M
+            for col in range(COLUMNS):
+                station_x = col * COLUMN_SPACING_M
+                self._add_static_cylinder(
+                    radius=POLE_RADIUS_M, height=pole_top_z,
+                    position=[station_x, row_y, pole_top_z / 2],
+                    color=pole_grey,
+                )
 
         half = list(TROUGH_HALF_EXTENTS_M)
         for pod in self.pods:
@@ -130,7 +145,7 @@ class GantryRobot:
     def move_to(self, pod, step_sleep=0.0):
         """
         Drives lift_joint to the pod's z, carriage_joint to the pod's x,
-        and reach_joint to the pod's y using POSITION_CONTROL, stepping
+        and row_joint to the pod's y using POSITION_CONTROL, stepping
         the simulation until all three joints are within
         POSITION_TOLERANCE_M of target (or the step cap is hit, so a bad
         target can't hang the run forever). Returns steps taken.
@@ -148,8 +163,8 @@ class GantryRobot:
             targetPosition=target_x, force=200, maxVelocity=0.6,
         )
         p.setJointMotorControl2(
-            self.robot_id, REACH_JOINT, p.POSITION_CONTROL,
-            targetPosition=target_y, force=100, maxVelocity=0.5,
+            self.robot_id, ROW_JOINT, p.POSITION_CONTROL,
+            targetPosition=target_y, force=200, maxVelocity=0.6,
         )
 
         steps = 0
@@ -161,10 +176,10 @@ class GantryRobot:
 
             lift_pos = p.getJointState(self.robot_id, LIFT_JOINT)[0]
             carriage_pos = p.getJointState(self.robot_id, CARRIAGE_JOINT)[0]
-            reach_pos = p.getJointState(self.robot_id, REACH_JOINT)[0]
+            row_pos = p.getJointState(self.robot_id, ROW_JOINT)[0]
             if (abs(lift_pos - target_z) < POSITION_TOLERANCE_M
                     and abs(carriage_pos - target_x) < POSITION_TOLERANCE_M
-                    and abs(reach_pos - target_y) < POSITION_TOLERANCE_M):
+                    and abs(row_pos - target_y) < POSITION_TOLERANCE_M):
                 break
 
         return steps
