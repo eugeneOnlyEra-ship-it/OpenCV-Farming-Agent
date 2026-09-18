@@ -2,37 +2,50 @@
 <!--
   gantry.urdf
 
-  Three-prismatic-joint gantry robot:
-    base_link     -- fixed anchor at the foot of the vertical rail
-    lift_link     -- slides along Z (vertical movement between trough layers)
-    carriage_link -- slides along X relative to the lift (lateral
-                     movement between pole columns)
-    row_link      -- slides along Y relative to the carriage --
-                     spans the full row-to-row travel distance (not
-                     just a short reach), since with a grid of
-                     stations the robot needs to travel between aisles
-                     as well as switch between a pole's front (+Y)
-                     and back (-Y) face within a row
-    camera_link   -- small fixed marker on the row carriage
-                     representing the camera frame-capture point
+  Overhead bridge-crane robot, not a free-floating XYZ stage. The whole
+  point of this redesign: the robot's X/Y travel happens UP AT the
+  overhead rail height (where it's physically supported by the farm's
+  horizontal interconnecting poles), and reaching a specific trough is
+  done by a hoist arm that telescopes DOWN from the trolley -- never by
+  the robot's own base drifting through open space with nothing under
+  it.
+
+  Kinematic chain:
+    base_link     -- fixed anchor, mounted at the overhead rail height
+    carriage_link -- slides along X (the rail running along a row)
+    row_link      -- slides along Y (between-aisle travel, and the
+                     front/back face switch at a pole -- one axis
+                     covers both, same as before)
+    mast_link     -- FIXED short drop from the trolley -- a rigid
+                     stub, not part of the robot's motion, that visually
+                     grounds the trolley to something hanging below the
+                     rail rather than the hoist appearing to sprout
+                     from thin air
+    hoist_link    -- slides DOWN (Z, but the joint's positive direction
+                     points down) from the bottom of the mast to reach
+                     each layer's height -- this is the "descends to
+                     the pod" motion, replacing the old ground-anchored
+                     vertical lift
+    camera_link   -- small fixed marker at the tip of the hoist
 
   Joint limits are generous and the actual per-pod targets are supplied
-  at runtime from pod_registry, so this file doesn't need to change if
-  the farm layout (stations/layers/spacing) changes.
+  at runtime from gantry_robot.py (which also computes the rail height
+  and mast length from the farm's dimensions), so this file doesn't
+  need to change if the farm layout changes.
 -->
 <robot name="pod_farm_gantry">
 
-  <material name="rail_grey">
-    <color rgba="0.35 0.35 0.38 1"/>
-  </material>
-  <material name="lift_blue">
-    <color rgba="0.15 0.45 0.75 1"/>
-  </material>
   <material name="carriage_orange">
     <color rgba="0.90 0.55 0.10 1"/>
   </material>
   <material name="row_teal">
     <color rgba="0.10 0.55 0.55 1"/>
+  </material>
+  <material name="mast_grey">
+    <color rgba="0.55 0.55 0.58 1"/>
+  </material>
+  <material name="hoist_blue">
+    <color rgba="0.15 0.45 0.75 1"/>
   </material>
   <material name="camera_dark">
     <color rgba="0.05 0.05 0.05 1"/>
@@ -42,14 +55,14 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.12 0.12 0.06"/>
+        <box size="0.12 0.12 0.05"/>
       </geometry>
-      <material name="rail_grey"/>
+      <material name="mast_grey"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.12 0.12 0.06"/>
+        <box size="0.12 0.12 0.05"/>
       </geometry>
     </collision>
     <inertial>
@@ -58,61 +71,32 @@
     </inertial>
   </link>
 
-  <link name="lift_link">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.10 0.30 0.08"/>
-      </geometry>
-      <material name="lift_blue"/>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.10 0.30 0.08"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="1.0"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-    </inertial>
-  </link>
-
-  <joint name="lift_joint" type="prismatic">
-    <parent link="base_link"/>
-    <child link="lift_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="0.0" upper="3.0" effort="200" velocity="0.6"/>
-    <dynamics damping="5.0" friction="1.0"/>
-  </joint>
-
   <link name="carriage_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.14 0.14 0.10"/>
+        <box size="0.16 0.16 0.07"/>
       </geometry>
       <material name="carriage_orange"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.14 0.14 0.10"/>
+        <box size="0.16 0.16 0.07"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.6"/>
-      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+      <mass value="0.8"/>
+      <inertia ixx="0.006" ixy="0" ixz="0" iyy="0.006" iyz="0" izz="0.006"/>
     </inertial>
   </link>
 
   <joint name="carriage_joint" type="prismatic">
-    <parent link="lift_link"/>
+    <parent link="base_link"/>
     <child link="carriage_link"/>
-    <origin xyz="0 0.05 0" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-3.0" upper="3.0" effort="200" velocity="0.6"/>
+    <limit lower="-1.0" upper="4.0" effort="250" velocity="0.6"/>
     <dynamics damping="5.0" friction="1.0"/>
   </joint>
 
@@ -120,32 +104,90 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.06 0.10 0.06"/>
+        <box size="0.14 0.14 0.06"/>
       </geometry>
       <material name="row_teal"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.06 0.10 0.06"/>
+        <box size="0.14 0.14 0.06"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.15"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.004" ixy="0" ixz="0" iyy="0.004" iyz="0" izz="0.004"/>
     </inertial>
   </link>
 
   <joint name="row_joint" type="prismatic">
     <parent link="carriage_link"/>
     <child link="row_link"/>
-    <origin xyz="0 0.08 0" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <!-- generous range: must cover the full row-to-row span of the
-         grid (ROWS * ROW_SPACING_M in pod_registry.py) plus the small
-         front/back trough offset on the first and last row, not just
-         a short front/back reach -->
-    <limit lower="-1.0" upper="8.0" effort="200" velocity="0.6"/>
+    <limit lower="-1.0" upper="8.0" effort="250" velocity="0.6"/>
+    <dynamics damping="5.0" friction="1.0"/>
+  </joint>
+
+  <!-- fixed rigid stub hanging from the trolley -- purely visual
+       continuity, not a controlled joint, so the hoist visibly starts
+       from something attached to the trolley rather than in mid-air -->
+  <link name="mast_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.025" length="0.35"/>
+      </geometry>
+      <material name="mast_grey"/>
+    </visual>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="mast_fixed_joint" type="fixed">
+    <parent link="row_link"/>
+    <child link="mast_link"/>
+    <origin xyz="0 0 -0.175" rpy="0 0 0"/>
+  </joint>
+
+  <!-- hoist_link is now just a small mounting stub -- the long visible
+       reach between the mast and the camera is handled by a separately
+       managed, dynamically-sized rod (see gantry_robot.py
+       _sync_hoist_visual), redrawn to exactly close the gap after every
+       move. A fixed-length link here couldn't do that: for any
+       extension beyond half its own length it would leave a visible
+       gap, and every layer in this farm needs 4-15x that much. -->
+  <link name="hoist_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.02" length="0.05"/>
+      </geometry>
+      <material name="hoist_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.02" length="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.2"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.0005"/>
+    </inertial>
+  </link>
+
+  <!-- axis points DOWN: increasing joint value extends the hoist
+       further below the mast, i.e. descends toward a lower trough
+       layer. Zero = hoist tucked right against the bottom of the mast. -->
+  <joint name="hoist_joint" type="prismatic">
+    <parent link="mast_link"/>
+    <child link="hoist_link"/>
+    <origin xyz="0 0 -0.175" rpy="0 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0.0" upper="2.5" effort="200" velocity="0.6"/>
     <dynamics damping="5.0" friction="1.0"/>
   </joint>
 
@@ -153,7 +195,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.03" length="0.08"/>
+        <cylinder radius="0.03" length="0.06"/>
       </geometry>
       <material name="camera_dark"/>
     </visual>
@@ -164,9 +206,9 @@
   </link>
 
   <joint name="camera_joint" type="fixed">
-    <parent link="row_link"/>
+    <parent link="hoist_link"/>
     <child link="camera_link"/>
-    <origin xyz="0 0.09 0" rpy="1.5708 0 0"/>
+    <origin xyz="0 0 -0.05" rpy="1.5708 0 0"/>
   </joint>
 
 </robot>

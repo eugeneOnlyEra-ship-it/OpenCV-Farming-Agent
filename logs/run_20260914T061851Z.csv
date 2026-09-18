@@ -1,0 +1,9 @@
+timestamp,pod_id,row,col,layer,side,crop_type,growth_stage,disease_flag,confidence,action,reason,ground_truth_stage,ground_truth_diseased
+2026-09-14T06:18:52.024378+00:00,R0C0-L0-F,0,0,0,front,cabbage,S2_3,False,0.805,log_and_continue,"healthy, confident reading (0.81) at stage 'S2_3'",S2_3,False
+2026-09-14T06:18:52.035689+00:00,R0C0-L0-B,0,0,0,back,lettuce,Leafy growth,False,0.842,log_and_continue,"healthy, confident reading (0.84) at stage 'Leafy growth'",Leafy growth,False
+2026-09-14T06:18:52.048774+00:00,R0C0-L1-F,0,0,1,front,mushroom,Harvest,True,0.929,flag_for_treatment,disease detected at stage 'Harvest' with confidence 0.93,Harvest,True
+2026-09-14T06:18:52.069617+00:00,R0C0-L1-B,0,0,1,back,cabbage,S2_3,False,0.411,schedule_monitoring,low-confidence reading (0.41 < 0.6) -- re-check before trusting it,S9,False
+2026-09-14T06:18:52.086802+00:00,R0C0-L2-F,0,0,2,front,lettuce,Early Growth,False,0.844,log_and_continue,"healthy, confident reading (0.84) at stage 'Early Growth'",Early Growth,False
+2026-09-14T06:18:52.097908+00:00,R0C0-L2-B,0,0,2,back,mushroom,Intermediate,False,0.907,schedule_monitoring,"healthy, confident, and near harvest ('Intermediate') -- tighten monitoring cadence",Intermediate,False
+2026-09-14T06:18:52.115106+00:00,R0C0-L3-F,0,0,3,front,cabbage,S6_7,True,0.933,flag_for_treatment,disease detected at stage 'S6_7' with confidence 0.93,S6_7,True
+2026-09-14T06:18:52.136805+00:00,R0C0-L3-B,0,0,3,back,lettuce,Harvest stage,False,0.885,schedule_monitoring,"healthy, confident, and near harvest ('Harvest stage') -- tighten monitoring cadence",Harvest stage,False

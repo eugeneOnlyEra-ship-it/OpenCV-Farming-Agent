@@ -58,7 +58,7 @@ GROWTH_STAGES = {
     "mushroom": ["Juvenile", "Intermediate", "Harvest"],
 }
 
-ROWS = 4                     # rows of stations, each in its own walkable aisle
+ROWS = 3                     # rows of stations, each in its own walkable aisle
 COLUMNS = 3                  # poles per row
 LAYERS_PER_STATION = 4       # stacked trough heights per pole (matches the SVG: 4 boxes)
 SIDES = ("front", "back")    # both faces of each pole
@@ -73,7 +73,56 @@ ROW_SPACING_M = AISLE_CLEAR_WIDTH_M + 2 * SIDE_OFFSET_M  # pole-centerline-to-po
 
 TROUGH_HALF_EXTENTS_M = (0.22, 0.08, 0.045)  # (x, y, z) -- long + shallow + thin, per the SVG shape
 
+# --- dock rails (added per the station/pole sketch) ---
+# Two rail-only extensions, one beyond row 0 and one beyond the last row:
+# where the agent is parked before work starts and where it parks again
+# once finished. Pure rail -- no poles of their own, no stations mounted
+# on them, cantilevered ("C" shaped) off the nearest row's end poles
+# rather than needing new dedicated vertical supports. Kept deliberately
+# closer than a full row-to-row aisle gap, since this is a parking
+# extension the agent's own trolley footprint needs to clear, not a
+# second human-walkable aisle.
+DOCK_SPACING_M = 0.5
+TOP_DOCK_Y = -DOCK_SPACING_M
+BOTTOM_DOCK_Y = (ROWS - 1) * ROW_SPACING_M + DOCK_SPACING_M
+DOCK_PARK_X = ((COLUMNS - 1) * COLUMN_SPACING_M) / 2  # centered on the rail
+
 IMAGE_DIR = os.path.join(os.path.dirname(__file__), "sample_images")
+
+
+def station_visit_order():
+    """
+    Station-level (not trough-level) visit order for the rail-only
+    agent, per the confirmed sketch: park at the top dock, sweep each
+    row's 3 poles left-to-right (alternating direction row to row so
+    the agent doesn't waste travel snapping back to column 0 each
+    time), then park at the bottom dock. No layers/sides/crops here --
+    this is purely about which horizontal pole and which pole position
+    on it, for reintroducing the arm/perception logic later without
+    having to redo the rail-travel logic.
+
+    Each stop is a dict: {label, x, y, is_dock, row, col}. row/col are
+    None for dock stops.
+    """
+    stops = [{
+        "label": "dock-top", "x": DOCK_PARK_X, "y": TOP_DOCK_Y,
+        "is_dock": True, "row": None, "col": None,
+    }]
+
+    for row in range(ROWS):
+        col_range = range(COLUMNS) if row % 2 == 0 else range(COLUMNS - 1, -1, -1)
+        row_y = row * ROW_SPACING_M
+        for col in col_range:
+            stops.append({
+                "label": f"R{row}C{col}", "x": col * COLUMN_SPACING_M, "y": row_y,
+                "is_dock": False, "row": row, "col": col,
+            })
+
+    stops.append({
+        "label": "dock-bottom", "x": DOCK_PARK_X, "y": BOTTOM_DOCK_Y,
+        "is_dock": True, "row": None, "col": None,
+    })
+    return stops
 
 
 def _ground_truth_cycle():
